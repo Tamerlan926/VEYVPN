@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ВЕЙVPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #007AFF;
+            --primary-glow: rgba(0, 122, 255, 0.4);
+            --bg-dark: #000000;
+            --card-bg: rgba(28, 28, 30, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #30D158;
+            --gold: #d4af37;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% -20%, #1a1a2e, #000000 80%);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Анимация появления */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(90deg, #fff, #a5a5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Табы устройств / вкладок */
+        .device-switcher {
+            display: flex;
+            background: rgba(58, 58, 60, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        .switch-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .switch-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* Карточки шагов */
+        .step-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .step-num {
+            background: var(--primary);
+            color: white;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: bold;
+        }
+        .step-title { font-size: 18px; font-weight: 600; }
+        .step-desc { font-size: 15px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
+
+        /* Список ссылок */
+        .link-list { display: flex; flex-direction: column; gap: 10px; }
+        .app-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .app-link:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.08); }
+        .app-info { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+        .app-icon { width: 24px; height: 24px; border-radius: 6px; background: #333; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .arrow { color: var(--text-secondary); font-size: 18px; }
+
+        /* Кнопки действий */
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .btn-auto {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 20px var(--primary-glow);
+        }
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid var(--border);
+        }
+        .btn-gold {
+            background: linear-gradient(90deg, #d4af37, #b8941f);
+            color: #000;
+            font-weight: 800;
+        }
+
+        /* Навигация */
+        .nav-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-back { background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+        .btn-next { background: var(--primary); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-next:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+
+        .hidden { display: none !important; }
+
+        /* Реферальный блок */
+        .ref-box { 
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(0,0,0,0)); 
+            border: 1px solid var(--gold); 
+            padding: 20px; 
+            border-radius: 20px; 
+            text-align: center; 
+            margin-bottom: 20px; 
+        }
+        .ref-link { 
+            background: rgba(0,0,0,0.3); 
+            padding: 10px; 
+            border-radius: 10px; 
+            word-break: break-all; 
+            font-family: monospace; 
+            font-size: 12px; 
+            margin: 15px 0; 
+            color: #fff; 
+            border: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header fade-in">
+            <h1>Подключение</h1>
+        </div>
+
+        <!-- Переключатель вкладок -->
+        <div class="device-switcher fade-in" style="animation-delay: 0.1s;">
+            <div class="switch-btn active" onclick="switchTab('connect')"> Подключиться</div>
+            <div class="switch-btn" onclick="switchTab('refer')"> 🎁 Пригласить</div>
+        </div>
+
+        <!-- Вкладка Подключения -->
+        <div id="tab-connect">
+            <!-- ШАГ 1 -->
+            <div class="step-card fade-in" style="animation-delay: 0.2s;">
+                <div class="step-header">
+                    <div class="step-num">1</div>
+                    <div class="step-title">Установите приложение</div>
+                </div>
+                <div class="step-desc" id="install-desc">
+                    Скачайте Happ для вашего устройства, чтобы начать использование.
+                </div>
+                
+                <div class="link-list" id="links-phone">
+                    <div class="app-link" onclick="tg.openLink('https://apps.apple.com/ru/app/happ/id6475226183')">
+                        <div class="app-info"><div class="app-icon"></div>Happ iOS (RU)</div><div class="arrow">›</div>
+                    </div>
+                    <div class="app-link" onclick="tg.openLink('https://play.google.com/store/apps/details?id=com.happ.android')">
+                        <div class="app-info"><div class="app-icon">🤖</div>Happ Android</div><div class="arrow">›</div>
+                    </div>
+                    <div class="app-link" onclick="tg.openLink('https://github.com/hiddify/hiddify-next/releases')">
+                        <div class="app-info"><div class="app-icon"></div>Happ APK</div><div class="arrow">›</div>
+                    </div>
+                </div>
+
+                <div class="link-list hidden" id="links-pc">
+                    <div class="app-link" onclick="tg.openLink('https://github.com/hiddify/hiddify-next/releases')">
+                        <div class="app-info"><div class="app-icon">🪟</div>Hiddify Windows</div><div class="arrow">›</div>
+                    </div>
+                    <div class="app-link" onclick="tg.openLink('https://github.com/hiddify/hiddify-next/releases')">
+                        <div class="app-info"><div class="app-icon"></div>Hiddify macOS</div><div class="arrow">›</div>
+                    </div>
+                </div>
+
+                <div class="link-list hidden" id="links-tv">
+                    <div class="app-link" onclick="tg.openLink('https://play.google.com/store/apps/details?id=com.happ.android')">
+                        <div class="app-info"><div class="app-icon"></div>Happ Android TV</div><div class="arrow">›</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ШАГ 2 -->
+            <div class="step-card hidden fade-in" id="step2">
+                <div class="step-header">
+                    <div class="step-num">2</div>
+                    <div class="step-title">Активируйте подписку</div>
+                </div>
+                <div class="step-desc">
+                    Нажмите "Авто-настройка" для мгновенного подключения или скопируйте ключ вручную.
+                </div>
+                
+                <button class="action-btn btn-auto" onclick="autoConnect()">
+                     Авто-настройка Happ
+                </button>
+                
+                <button class="action-btn btn-copy" onclick="copyKey()">
+                     Скопировать ссылку
+                </button>
+            </div>
+
+            <!-- Навигация для шагов -->
+            <div class="nav-bar fade-in" style="animation-delay: 0.3s;" id="connect-nav">
+                <button class="nav-btn btn-back" id="backBtn" onclick="goBack()" disabled>Назад</button>
+                <button class="nav-btn btn-next" id="nextBtn" onclick="goNext()">Далее</button>
+            </div>
+        </div>
+
+        <!-- Вкладка Рефералки -->
+        <div id="tab-refer" class="hidden fade-in">
+            <div class="ref-box">
+                <h2 style="margin-top:0; color: var(--gold);">Пригласи друга</h2>
+                <p style="color:var(--text-secondary);">Получи <b style="color:white;">+7 дней</b> в ВЕЙVPN за каждого друга, который перейдет по твоей ссылке.</p>
+                
+                <div class="ref-link" id="my-ref-link">Загрузка...</div>
+                
+                <button class="action-btn btn-gold" onclick="copyRef()">Скопировать ссылку</button>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-desc" style="text-align:center;">
+                    Ваш друг должен нажать на ссылку и запустить бота. Бонус начисляется автоматически!
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Данные юзера (берем ID из Telegram)
+        const userId = tg.initDataUnsafe?.user?.id || 0;
+        
+        // Заглушка ключа (В РЕАЛЬНОСТИ ЗДЕСЬ ДОЛЖЕН БЫТЬ ЗАПРОС К БОТУ ИЛИ БАЗЕ)
+        // Так как Mini App не имеет прямого доступа к БД Python, мы используем кнопку "Показать ключ в боте"
+        // Или если ты настроил API, то fetch запрос.
+        // Для простоты сейчас: кнопка ведет в бота за ключом.
+        const botUsername = "HalalPeak_bot"; // Замени на свой юзернейм бота без @
+        const refLink = `https://t.me/${botUsername}?start=ref_${userId}`;
+        
+        // Ссылка для получения ключа (ведет в бота)
+        const getKeyLink = `https://t.me/${botUsername}?start=show_key`;
+
+        document.getElementById('my-ref-link').innerText = refLink;
+
+        let currentStep = 1;
+        let currentDevice = 'phone';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(tab === 'connect') {
+                document.getElementById('tab-connect').classList.remove('hidden');
+                document.getElementById('tab-refer').classList.add('hidden');
+            } else {
+                document.getElementById('tab-connect').classList.add('hidden');
+                document.getElementById('tab-refer').classList.remove('hidden');
+            }
+        }
+
+        function switchDevice(device) {
+            currentDevice = device;
+            // Логика переключения ссылок внутри вкладки Connect (если нужно)
+            // Здесь упрощено для примера
+        }
+
+        function goNext() {
+            if (currentStep === 1) {
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('backBtn').disabled = false;
+                document.getElementById('backBtn').style.opacity = "1";
+                document.getElementById('nextBtn').innerText = "Готово";
+                currentStep = 2;
+            } else {
+                tg.close();
+            }
+        }
+
+        function goBack() {
+            if (currentStep === 2) {
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('backBtn').disabled = true;
+                document.getElementById('backBtn').style.opacity = "0.5";
+                document.getElementById('nextBtn').innerText = "Далее";
+                currentStep = 1;
+            }
+        }
+
+        function autoConnect() {
+            // Так как у нас нет реального ключа в JS, ведем пользователя в бота за ним
+            // Или если ты вставишь реальный ключ в переменную userKey, то раскомментируй строку ниже:
+            // tg.openLink("hiddify://import/" + encodeURIComponent(userKey));
+            
+            tg.showAlert("Для авто-настройки получите ключ в боте!");
+            tg.openLink(getKeyLink);
+        }
+
+        function copyKey() {
+            // Аналогично, ведем в бота за ключом
+            tg.showAlert("Перейдите в бота, чтобы скопировать ваш уникальный ключ!");
+            tg.openLink(getKeyLink);
+        }
+
+        function copyRef() {
+            navigator.clipboard.writeText(refLink);
+            tg.showAlert("Реферальная ссылка скопирована!");
+        }
+    </script>
+</body>
+</html>

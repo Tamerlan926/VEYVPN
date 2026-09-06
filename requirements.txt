@@ -1,0 +1,7 @@
+aiogram>=3.0.0
+aiosqlite
+httpx
+python-dotenv
+yookassa
+qrcode[pil]
+Pillow
