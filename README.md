@@ -2,7 +2,7 @@
 
 Премиальный Telegram-бот для продажи и управления подписками VPN на базе протокола **VLESS + Reality**. Система включает в себя панель управления **3x-ui**, интеграцию с платежной системой **YooKassa** и современное **Mini App** внутри Telegram.
 
-![Preview]([https://blog.smm.school/wp-content/uploads/2025/04/cover-top-botov-dlya-biznesa.jpg))
+![Preview]([https://cdn-edge.kwork.ru/pics/t3/11/51576965-69f65aebd2429.jpg))
 
 ## ✨ Особенности
 
